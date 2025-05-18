@@ -19,7 +19,10 @@ This behavior is unexpected as no ENS names are being used for the contract inte
 * **RPC Providers Tested:**
     * QuickNode (e.g., `https://proportionate-dry-brook.matic.quiknode.pro/YOUR_QUICKNODE_KEY/`)
     * Public RPC (e.g., `https://polygon-rpc.com`, `https://polygon-bor-rpc.publicnode.com`)
-* **Operating System:** [Specifica il tuo OS qui, es. Ubuntu 22.04 on WSL2, macOS Sonoma, Windows 11]
+* **Operating System:** Ubuntu 22.04 on WSL2, (into Windows 11 home 64 bit)
+* PC Notebook Lenovo IdeaPad 5 14ALC05 RAM 8 Gb
+* AMD Ryzen 7 5700U whith Radeon Graphics 1,80 GHz
+* Windows 11 Home v. 24H2 12 jan 2025 Build 26100.4061 Package 1000.26100.84.0
 
 ## Contract Information
 
