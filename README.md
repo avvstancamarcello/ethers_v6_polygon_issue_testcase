@@ -34,7 +34,7 @@ This behavior is unexpected as no ENS names are being used for the contract inte
 
 * **Contract Name:** LHILecceNFT
 * **Deployed Address (Polygon Mainnet):** `0x6a6d5c29ad8f23209186775873e123b31c26e9`
-* **PolygonScan Link:** [https://polygonscan.com/address/0x6a6d5c29ad8f23209186775873e123b31c26e9](https://polygonscan.com/address/0x6a6d5c29ad8f23209186775873e123b31c26e9)
+* **PolygonScan Link:** [https://polygonscan.com/address/0x6a6d5c29ad8f23209186775873e123b31c26e9#code](https://polygonscan.com/address/0x6a6d5c29ad8f23209186775873e123b31c26e9#code)
 * **Relevant Function (minimal ABI used in `testEthersDirect.js`):**
     ```json
     [
