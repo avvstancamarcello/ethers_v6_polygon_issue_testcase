@@ -118,17 +118,33 @@ at async #getResolver (/home/avvocato/LHI-NFT-CORRETTO/node_modules/ethers/lib.c
 at async EnsResolver.fromName (/home/avvocato/LHI-NFT-CORRETTO/node_modules/ethers/lib.commonjs/providers/ens-resolver.js:486:26)
 at async JsonRpcProvider.getResolver (/home/avvocato/LHI-NFT-CORRETTO/node_modules/ethers/lib.commonjs/providers/abstract-provider.js:832:16)
 
-### 2. Output from `npx hardhat run scripts/testConnection.cjs --network polygon` (with ethers@6.11.1 and `provider.getResolver` hack applied in script):
+### 2. Output from `npx hardhat run scripts/testConnection.cjs --network polygon` 
+(with ethers@6.11.1 and `provider.getResolver` hack applied in script):
 
-This script, when using Hardhat's ethers provider and applying a hack to make `provider.getResolver` return `null`, still fails, but with a different error, further indicating ENS involvement:
+This script, when using Hardhat's ethers provider and applying a hack to make `provider.getResolver` return `null`, 
+still fails, but with a different error, further indicating ENS involvement:
 Target network specified: polygon
-Using RPC URL: https://proportionate-dry-brook.matic.quiknode.pro/752b1e43a682209ddc19a49978c10acac9458739
+Using RPC URL: https://proportionate-dry-brook.matic.quiknode.pro/MY_QUICKNODE_RPC_ENDPOINT
 Attempting to call provider.getBlockNumber()...
 Current block number: 71640171
 Attempting to get ENS resolver for 'unlikelyname.eth'...
 [HACK] provider.getResolver called for: unlikelyname.eth, returning null.
 ENS Resolver for 'unlikelyname.eth': null
 Attempting to connect with account: 0xf9909c6CD90566BD56621EE0cAc42986ae334Ea3
+*(Please ensure to replace `YOUR_RPC_URL_PART`, `... (other logs) ...`, and the specific function call in the stack 
+trace (`Proxy.pricesInWei` or `Proxy.name`) and `LINE_NUMBER:COLUMN_NUMBER` with the actual details from your original error log for this specific test.)*
+
+This demonstrates that the ENS-related issues or provider interaction problems were present even 
+when using the standard Hardhat ethers integration, manifesting as a `NotImplementedError` within the `HardhatEthersProvider`.
+
+Important Notes:
+Original Error Context: I recall that the `NotImplementedError: Method 'HardhatEthersProvider.resolveName'` 
+error occurred when using `hre.ethers` (i.e., the provider and signer managed by Hardhat). The `testConnection.cjs` 
+script that I used to produce the `UNCONFIGURED_NAME` or `BAD_DATA` error was a modified version that directly used
+`new ethers.JsonRpcProvider()` and `new ethers.Wallet()`. It's important to provide the correct stack trace for each error scenario.
+
+Placeholder in Stack Trace: In the stack trace I provided [referring to a previous draft of the README or issue], there is `// ... (rest of stack trace for this specific error) ...`. Please replace this line with the complete and relevant stack trace for the `NotImplementedError`.
+
 Account balance: 365.977862946638599478 MATIC
 Loading contract ABI from artifacts...
 Contract ABI loaded successfully.
@@ -149,10 +165,22 @@ Stack trace: Error: unconfigured name (value="0x6a6d5c29ad8f23209186775873e123b3
     at Wallet.call (/home/avvocato/LHI-NFT-CORRETTO/node_modules/ethers/src.ts/providers/abstract-signer.ts:221:49)
     at staticCallResult (/home/avvocato/LHI-NFT-CORRETTO/node_modules/ethers/src.ts/contract/contract.ts:337:22)
 ---------------------------------------------------------------------------------------------
-*(Nota: se lo script Hardhat `testConnection.cjs` originale (senza hack) produceva l'errore `NotImplementedError: Method 'HardhatEthersProvider.resolveName'`, potresti menzionarlo anche qui come ulteriore punto dati, ma i due output sopra sono i più rilevanti per l'interazione diretta con ethers.js e il comportamento ENS.)*
 
+The script Hardhat `testConnection.cjs` original (whitouthack) produceva l'errore `NotImplementedError: Method 'HardhatEthersProvider.resolveName'`
 ## Additional Context
+### 2. Initial Output from `npx hardhat run scripts/testConnection.cjs --network polygon` (using `hre.ethers` wrapper, before direct provider tests and without hacks):
 
-The core issue appears to be that `ethers.js` v6 (tested with v6.11.1 and v6.14.1) incorrectly triggers ENS resolution logic (specifically involving a call to a method like `resolver(bytes32)` internally via `JsonRpcProvider.getResolver`) even when a direct hexadecimal address is provided for a contract call on Polygon Mainnet (chainId 137). The RPC provider's response of `0x` to this internal ENS-related query is then not handled gracefully, leading to a `BAD_DATA` error when `ethers.js` attempts to decode `0x` as a valid resolver address. This makes basic view function calls using `provider.call()` (and by extension, `Contract` object interactions) unreliable under these conditions.
+The original Hardhat script `testConnection.cjs` (without any hacks, using `hre.ethers`) produced the `NotImplementedError: Method 'HardhatEthersProvider.resolveName'` error.
 
-Any insights or guidance on how to correctly perform `provider.call()` or contract view function calls on Polygon with `ethers.js` v6 without triggering this ENS-related error pathway would be greatly appreciated.
+When initially attempting to read contract data (e.g., `pricesInWei` or `name()`) using Hardhat's ethers wrapper 
+(`hre.ethers.getContractFactory` and contract instance methods via `hre.ethers`), the following error was observed:
+
+The core issue appears to be that `ethers.js` v6 (tested with v6.11.1 and v6.14.1) incorrectly triggers ENS resolution logic 
+(specifically involving a call to a method like `resolver(bytes32)` internally via `JsonRpcProvider.getResolver`) 
+even when a direct hexadecimal address is provided for a contract call on Polygon Mainnet (chainId 137). 
+The RPC provider's response of `0x` to this internal ENS-related query is then not handled gracefully, 
+leading to a `BAD_DATA` error when `ethers.js` attempts to decode `0x` as a valid resolver address. 
+This makes basic view function calls using `provider.call()` (and by extension, `Contract` object interactions) unreliable under these conditions.
+
+Any insights or guidance on how to correctly perform `provider.call()` or contract view function calls on Polygon
+with `ethers.js` v6 without triggering this ENS-related error pathway would be greatly appreciated.
