@@ -8,8 +8,8 @@
     "test": "echo \"Error: no test specified, run 'npm start' to reproduce the issue\" && exit 1"
   },
   "dependencies": {
-    "ethers": "6.11.1", // La versione che stai usando e che dà l'errore
-    "dotenv": "^16.0.3"  // O la versione che usi
+    "ethers": "6.11.1", 
+    "dotenv": "^16.0.3"
   },
   "author": "avvstancamarcello",
   "license": "MIT"

@@ -154,6 +154,27 @@ at async #getResolver (/home/avvocato/LHI-NFT-CORRETTO/node_modules/ethers/lib.c
 at async EnsResolver.fromName (/home/avvocato/LHI-NFT-CORRETTO/node_modules/ethers/lib.commonjs/providers/ens-resolver.js:486:26)
 at async JsonRpcProvider.getResolver (/home/avvocato/LHI-NFT-CORRETTO/node_modules/ethers/lib.commonjs/providers/abstract-provider.js:832:16)
 
+"Actual Result" -> "1. Output from node scripts/testEthersDirect.js".
+
+node scripts/testEthersDirect.js
+Using RPC URL (direct from .env): https://proportionate-dry-brook.matic.quiknode.pro/752b1e43a682209ddc19a49978c10acac9458739
+Attempting to call provider.getBlockNumber()...
+Current block number: 71721940
+Attempting to read contract name with direct provider.call... Calldata: 0x06fdde03
+--- ERROR DURING DIRECT provider.call ---
+Message: could not decode result data (value="0x", info={ "method": "resolver", "signature": "resolver(bytes32)" }, code=BAD_DATA, version=6.11.1)
+Stack: Error: could not decode result data (value="0x", info={ "method": "resolver", "signature": "resolver(bytes32)" }, code=BAD_DATA, version=6.11.1)
+    at makeError (/home/avvocato/LHI-NFT-CORRETTO/LHI-CLONE/ethers_v6_polygon_issue_testcase/node_modules/ethers/lib.commonjs/utils/errors.js:129:21)
+    at assert (/home/avvocato/LHI-NFT-CORRETTO/LHI-CLONE/ethers_v6_polygon_issue_testcase/node_modules/ethers/lib.commonjs/utils/errors.js:149:15)
+    at Interface.decodeFunctionResult (/home/avvocato/LHI-NFT-CORRETTO/LHI-CLONE/ethers_v6_polygon_issue_testcase/node_modules/ethers/lib.commonjs/abi/interface.js:780:31)
+    at staticCallResult (/home/avvocato/LHI-NFT-CORRETTO/LHI-CLONE/ethers_v6_polygon_issue_testcase/node_modules/ethers/lib.commonjs/contract/contract.js:254:35)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async staticCall (/home/avvocato/LHI-NFT-CORRETTO/LHI-CLONE/ethers_v6_polygon_issue_testcase/node_modules/ethers/lib.commonjs/contract/contract.js:219:24)
+    at async Proxy.resolver (/home/avvocato/LHI-NFT-CORRETTO/LHI-CLONE/ethers_v6_polygon_issue_testcase/node_modules/ethers/lib.commonjs/contract/contract.js:259:20)
+    at async #getResolver (/home/avvocato/LHI-NFT-CORRETTO/LHI-CLONE/ethers_v6_polygon_issue_testcase/node_modules/ethers/lib.commonjs/providers/ens-resolver.js:455:26)
+    at async EnsResolver.fromName (/home/avvocato/LHI-NFT-CORRETTO/LHI-CLONE/ethers_v6_polygon_issue_testcase/node_modules/ethers/lib.commonjs/providers/ens-resolver.js:486:26)
+    at async JsonRpcProvider.getResolver (/home/avvocato/LHI-NFT-CORRETTO/LHI-CLONE/ethers_v6_polygon_issue_testcase/node_modules/ethers/lib.commonjs/providers/abstract-provider.js:832:16)
+
 ### 2. Output from `npx hardhat run scripts/testConnection.cjs --network polygon` 
 (with ethers@6.11.1 and `provider.getResolver` hack applied in script):
 
@@ -220,3 +241,24 @@ This makes basic view function calls using `provider.call()` (and by extension, 
 
 Any insights or guidance on how to correctly perform `provider.call()` or contract view function calls on Polygon
 with `ethers.js` v6 without triggering this ENS-related error pathway would be greatly appreciated.
+
+## Evolution of Observed Errors
+
+**Important Notes on Error Context:**
+
+It's crucial to distinguish between the error scenarios observed:
+
+1.  **Initial Error with `hre.ethers` (Hardhat's Ethers Wrapper):**
+    The `NotImplementedError: Method 'HardhatEthersProvider.resolveName'` error originally occurred when using scripts that relied on Hardhat's default ethers integration (e.g., `hre.ethers.getSigners()`, `hre.ethers.getContractFactory()`). This happened when attempting to call contract view functions like `pricesInWei()` (in the `mintNFT.cjs` script) or `name()` (in early versions of `testConnection.cjs` that used `hre.ethers`).
+
+2.  **Errors with Direct `ethers.JsonRpcProvider` and `ethers.Wallet/Contract` (`testConnection.cjs` - Modified Versions):**
+    The scripts named `testConnection.cjs` were subsequently modified to bypass `hre.ethers` and use `new ethers.JsonRpcProvider()` and `new ethers.Wallet()` (or `new ethers.Contract()`) directly.
+    * When an experimental hack was applied to this direct-ethers script (overriding `provider.getResolver` to return `null`), the error changed to `UNCONFIGURED_NAME (value="0x6a...")`.
+    * When the `testConnection.cjs` script (or `testEthersDirect.js`) was run using direct `provider.call()` (without the `getResolver` hack), the error observed was `could not decode result data (value="0x", info={ "method": "resolver", "signature": "resolver(bytes32)" }, code=BAD_DATA)`.
+
+It's important that any stack traces provided in this issue report are correctly attributed to the specific script version and interaction method (direct ethers.js vs. Hardhat's ethers wrapper) that produced them. The primary focus of this repository is now the `BAD_DATA` error occurring with direct `provider.call()` in `testEthersDirect.js`.
+
+**Regarding the placeholder `// ... (rest of stack trace for this specific error) ...`:**
+Please ensure this is replaced with the full, relevant stack trace for the `NotImplementedError` if you are including a section detailing that specific error scenario from the Hardhat-wrapped ethers interaction.
+This helps show that the problem isn't just a single error message but a persistent issue manifesting in different ways depending on the level of abstraction used with ethers.js.
+This helps show that the problem isn't just a single error message but a persistent issue manifesting in different ways depending on the level of abstraction used with ethers.js.
