@@ -23,13 +23,27 @@ This behavior is unexpected as no ENS names are being used for the contract inte
 * **Hardhat (for `testConnection.cjs` context):** v2.22.19
 * **`@nomicfoundation/hardhat-toolbox` (for `testConnection.cjs` context):** v5.0.0
 * **Network:** Polygon Mainnet (Chain ID: 137)
+* // In scripts/testEthersDirect.js
+const contractABI = [
+    {"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},
+    // Aggiungi qui l'ABI per pricesInWei se vuoi testarlo anche
+    // {"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"pricesInWei","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}
+];
+
+* * **`(Optional)
+  * contracts/LHILecceNFT.sol`**: Full contract source code is provided for completeness.
+  * The `testEthersDirect.js` script uses an embedded minimal ABI for the `name()` function.
+  * * **`(Optional) hardhat.config.cjs`**: Included for context if one wishes to understand
+    * the original Hardhat environment setup or run other Hardhat-based scripts
+    * (like an alternative test case showing the issue with `hre.ethers`).
+      
 * **RPC Providers Tested:**
     * QuickNode (e.g., `https://proportionate-dry-brook.matic.quiknode.pro/YOUR_QUICKNODE_KEY/`)
     * Public RPC (e.g., `https://polygon-rpc.com`, `https://polygon-bor-rpc.publicnode.com`)
-* **Operating System (WSL2):** Ubuntu 22.04.5 LTS
-* **Host Operating System:** Windows 11 Home, Version 24H2, Build 26100.4061
-* **Hardware:** PC Notebook Lenovo IdeaPad 5 14ALC05, RAM 8 Gb, AMD Ryzen 7 5700U with Radeon Graphics 1.80 GHz
-
+* **Operating System:** Ubuntu 22.04.5 LTS (running on Windows 11 Home, 64-bit, via WSL2)
+* **Hardware:** Lenovo IdeaPad 5 14ALC05, RAM 8GB, AMD Ryzen 7 5700U with Radeon Graphics 1.80 GHz
+* **Host OS Version (Windows):** Windows 11 Home, Version 24H2, OS Build 26100.4061, Experience Pack 1000.26100.84.0
+  
 ## Contract Information
 
 * **Contract Name:** LHILecceNFT
@@ -62,6 +76,23 @@ This behavior is unexpected as no ENS names are being used for the contract inte
 * **`.env.example`**: Example environment file.
 * **`hardhat.config.cjs`**: Hardhat configuration file, relevant if running `testConnection.cjs`.
 * **`contracts/LHILecceNFT.sol`**: Full source code of the smart contract.
+
+* ## Repository Structure (Minimal Test Case)
+
+This repository is structured to provide a minimal environment to reproduce the issue:
+
+ethers_v6_polygon_issue_testcase/
+├── .env.example                 # Example environment file for RPC URL and Private Key
+├── .gitignore                   # Standard gitignore for Node.js/Hardhat projects
+├── contracts/                   # Solidity smart contract
+│   └── LHILecceNFT.sol          # The smart contract source code
+├── hardhat.config.cjs           # Hardhat configuration file (relevant for compiling and if using Hardhat scripts)
+├── package.json                 # Project dependencies (ethers, dotenv, hardhat, etc.)
+├── package-lock.json            # Exact dependency versions
+├── scripts/
+│   └── testEthersDirect.js      # The Node.js script using direct ethers.js calls that reproduces the error
+└── README.md                    # This file: detailed issue description
+# This file: detailed issue description
 
 ## Steps to Reproduce
 
