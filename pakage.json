@@ -1,0 +1,16 @@
+{
+  "name": "ethers-v6-polygon-issue-testcase",
+  "version": "1.0.0",
+  "description": "Minimal reproduction case for ethers.js v6 issue on Polygon with provider.call and ENS resolver logic.",
+  "main": "scripts/testEthersDirect.js",
+  "scripts": {
+    "start": "node scripts/testEthersDirect.js",
+    "test": "echo \"Error: no test specified, run 'npm start' to reproduce the issue\" && exit 1"
+  },
+  "dependencies": {
+    "ethers": "6.11.1", // La versione che stai usando e che dà l'errore
+    "dotenv": "^16.0.3"  // O la versione che usi
+  },
+  "author": "avvstancamarcello",
+  "license": "MIT"
+}
