@@ -1,10 +1,15 @@
 # Ethers.js v6 - Polygon `provider.call()` Issue: "could not decode result data (value="0x", info={ "method": "resolver", ...})"
 
-This repository provides a minimal test case to reproduce an issue encountered with `ethers.js` (v6.11.1, also observed with v6.14.1) when interacting with Polygon Mainnet. A direct `provider.call()` to a simple view function on a deployed contract, as well as contract interactions via Hardhat's ethers wrapper, unexpectedly trigger internal ENS resolver logic, which fails with a `BAD_DATA` or `UNCONFIGURED_NAME` error.
+This repository provides a minimal test case to reproduce an issue encountered with `ethers.js` 
+(v6.11.1, also observed with v6.14.1) when interacting with Polygon Mainnet. 
+A direct `provider.call()` to a simple view function on a deployed contract, 
+as well as contract interactions via Hardhat's ethers wrapper, unexpectedly trigger internal ENS resolver logic, 
+which fails with a `BAD_DATA` or `UNCONFIGURED_NAME` error.
 
 ## Problem Description
 
-We are encountering a persistent error when attempting to make simple `view` function calls (e.g., `name()`) to a deployed and verified smart contract on Polygon Mainnet (chainId 137).
+We are encountering a persistent error when attempting to make simple `view` function calls (e.g., `name()`) 
+to a deployed and verified smart contract on Polygon Mainnet (chainId 137).
 
 1.  **When using `ethers.JsonRpcProvider.call()` directly (via a plain Node.js script):** The call fails with a `BAD_DATA` error (info: `{ "method": "resolver", "signature": "resolver(bytes32)" }`, `value="0x"`).
 2.  **When using Hardhat's ethers wrapper (`hre.ethers` via `npx hardhat run scripts/...`):** The call previously failed with a `NotImplementedError: Method 'HardhatEthersProvider.resolveName' is not implemented`. After applying a workaround (overriding `provider.getResolver` to return `null`), the error changed to `UNCONFIGURED_NAME` for the contract address.
