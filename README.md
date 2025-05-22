@@ -262,3 +262,70 @@ It's important that any stack traces provided in this issue report are correctly
 Please ensure this is replaced with the full, relevant stack trace for the `NotImplementedError` if you are including a section detailing that specific error scenario from the Hardhat-wrapped ethers interaction.
 This helps show that the problem isn't just a single error message but a persistent issue manifesting in different ways depending on the level of abstraction used with ethers.js.
 This helps show that the problem isn't just a single error message but a persistent issue manifesting in different ways depending on the level of abstraction used with ethers.js.
+
+***************************
+Hello team, I'm posting an update on this issue as we've successfully identified and resolved the root cause!
+Closing Issue: Resolved Contract Recognition Problem on Polygon (EIP-55 Checksum)
+
+Hi everyone,
+
+I'm pleased to announce that the issue encountered in our test script, which was preventing the correct recognition and interaction with our smart contract on the Polygon network, has been resolved!
+
+The error manifested with messages like "could not decode result data (value="0x", info={ "method": "resolver", ...})" and was due to a subtle, yet crucial, difference in how addresses are handled when they are not properly checksummed (EIP-55).
+
+The Root Cause: EIP-55 Checksumming vs. Case Sensitivity
+
+Initially, we suspected the error might be related to the address length (e.g., whether it had 40 or 42 characters including the "0x" prefix). While an incorrect length would certainly cause an error, the specific "could not decode result data" error with the resolver(bytes32) method pointed to a different underlying issue.
+
+The problem was that the address used in our script was in all lowercase characters (e.g., 0x6a6d5c29ad8f23209186775873e123b31c26e9). Although Ethereum addresses are case-insensitive at the blockchain protocol level, and completely lowercase addresses are technically valid, the EIP-55 checksum standard introduces a mix of uppercase and lowercase letters. This mixed-case formatting is not arbitrary; it serves as a checksum mechanism to help detect typos in addresses.
+
+Libraries like Ethers.js, when provided with a string that has the correct length and "0x" prefix but does not conform to the EIP-55 checksum format, will often interpret it as a potential ENS (Ethereum Name Service) name that needs to be resolved. This led Ethers.js to attempt calling a resolver() function, which then failed, causing the "could not decode result data" error because the address was neither a valid ENS name nor a properly checksummed address for direct contract interaction.
+
+The Solution:
+
+The solution was to ensure the contractAddress variable in our script used the exact EIP-55 checksummed address provided by PolygonScan. This address explicitly includes the correct mix of uppercase and lowercase letters.
+
+The correct and working address is: const contractAddress = "0x6a6d5Dc29ad8ff23209186775873e123b31c26E9";
+Okay, here is the GitHub post draft in English, incorporating your specific clarifications about the address format and the EIP-55 checksum standard.
+
+Closing Issue: Resolved Contract Recognition Problem on Polygon (EIP-55 Checksum)
+
+Hi everyone,
+
+I'm pleased to announce that the issue encountered in our test script, which was preventing the correct recognition and interaction with our smart contract on the Polygon network, has been resolved!
+
+The error manifested with messages like "could not decode result data (value="0x", info={ "method": "resolver", ...})" and was due to a subtle, yet crucial, difference in how addresses are handled when they are not properly checksummed (EIP-55).
+
+The Root Cause: EIP-55 Checksumming vs. Case Sensitivity
+
+Initially, we suspected the error might be related to the address length (e.g., whether it had 40 or 42 characters including the "0x" prefix). While an incorrect length would certainly cause an error, the specific "could not decode result data" error with the resolver(bytes32) method pointed to a different underlying issue.
+
+The problem was that the address used in our script was in all lowercase characters (e.g., 0x6a6d5c29ad8f23209186775873e123b31c26e9). Although Ethereum addresses are case-insensitive at the blockchain protocol level, and completely lowercase addresses are technically valid, the EIP-55 checksum standard introduces a mix of uppercase and lowercase letters. This mixed-case formatting is not arbitrary; it serves as a checksum mechanism to help detect typos in addresses.
+
+Libraries like Ethers.js, when provided with a string that has the correct length and "0x" prefix but does not conform to the EIP-55 checksum format, will often interpret it as a potential ENS (Ethereum Name Service) name that needs to be resolved. This led Ethers.js to attempt calling a resolver() function, which then failed, causing the "could not decode result data" error because the address was neither a valid ENS name nor a properly checksummed address for direct contract interaction.
+
+The Solution:
+
+The solution was to ensure the contractAddress variable in our script used the exact EIP-55 checksummed address provided by PolygonScan. This address explicitly includes the correct mix of uppercase and lowercase letters.
+
+The correct and working address is:
+
+< const contractAddress = "0x6a6d5Dc29ad8ff23209186775873e123b31c26E9"; >
+It is crucial that this address is copied and used exactly as it appears on PolygonScan, with the precise capitalization, to enable Ethers.js to immediately recognize it as a valid contract address and bypass the ENS resolution attempt.
+
+Corrective Action in the Script:
+
+For anyone facing similar issues, please ensure the line defining your contract address in testEthersDirect.js (or similar script) is as follows:
+// BEFORE: const contractAddress = "0x6a6d5c29ad8f23209186775873e123b31c26e9"; // INCORRECT (all lowercase)
+// AFTER:
+const contractAddress = "0x6a6d5Dc29ad8ff23209186775873e123b31c26E9"; // CORRECT (with EIP-55 checksum)
+After correcting this line and saving the file, the test should now produce a successful output similar to this:
+<< Using RPC URL (direct from .env): https://<your-quiknode-url>
+Attempting to call provider.getBlockNumber()...
+Current block number: 71832116
+Attempting to read contract name with direct provider.call... Calldata: 0x06fdde03
+Raw result from provider.call: 0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000d4c4849204c6563636665204e465400000000000000000000000000000000000000
+Contract Name (from direct provider.call): LHI Lecce NFT
+Test with DIRECT provider.call completed successfully.>>
+A huge thanks to everyone for their patience and assistance in debugging this!
+
